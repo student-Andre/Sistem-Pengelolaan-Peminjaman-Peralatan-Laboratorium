@@ -66,3 +66,17 @@ class Peralatan:
 
         self.update_stok(jumlah, kondisi_baru)
         return True
+
+    def set_nama(self, nama_baru):
+        self.__nama_alat = nama_baru
+
+    def set_kategori(self, kategori_baru):
+        self.__kategori = kategori_baru
+
+    def set_stok_total(self, stok_baru):
+        selisih = stok_baru - self.__stok_total
+        if stok_baru <= 0 or self.__stok_tersedia + selisih < 0:
+            return False
+        self.__stok_total = stok_baru
+        self.__stok_tersedia += selisih
+        return True

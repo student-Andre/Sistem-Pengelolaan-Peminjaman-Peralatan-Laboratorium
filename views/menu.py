@@ -320,6 +320,9 @@ def tampil_menu(lab):
                        ("10", "Ubah kondisi alat")]),
         ("TRANSAKSI", [("11", "Buat peminjaman"), ("12", "Proses pengembalian"),
                        ("13", "Lihat daftar transaksi")]),
+        ("KELOLA DATA", [("15", "Tambah kategori"), ("16", "Edit kategori"),
+                         ("17", "Hapus kategori"), ("18", "Edit mahasiswa"),
+                         ("19", "Edit alat")]),
         ("LAINNYA", [("14", "Log aktivitas"), ("0", "Keluar")]),
     ]
 
@@ -341,6 +344,12 @@ def tampil_menu(lab):
 
 
 def jalankan_menu(lab):
+    from views.tambah_kategori import menu_tambah_kategori
+    from views.edit_kategori import menu_edit_kategori
+    from views.hapus_kategori import menu_hapus_kategori
+    from views.edit_mahasiswa import menu_edit_mahasiswa
+    from views.edit_alat import menu_edit_alat
+
     while True:
         tampil_menu(lab)
         pilih = input("  Pilih menu : ").strip()
@@ -375,6 +384,16 @@ def jalankan_menu(lab):
             tampil_transaksi(lab)
         elif pilih == "14":
             tampil_log(lab)
+        elif pilih == "15":
+            menu_tambah_kategori(lab)
+        elif pilih == "16":
+            menu_edit_kategori(lab)
+        elif pilih == "17":
+            menu_hapus_kategori(lab)
+        elif pilih == "18":
+            menu_edit_mahasiswa(lab)
+        elif pilih == "19":
+            menu_edit_alat(lab)
         elif pilih == "0":
             print()
             info("Terima kasih, program selesai.")

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from models import Mahasiswa, Peralatan, TransaksiPeminjaman, LogActivity
+from models import Kategori, Mahasiswa, Peralatan, TransaksiPeminjaman, LogActivity
 
 
 class SistemLaboratorium:
@@ -52,6 +52,77 @@ class SistemLaboratorium:
         nama = self.__data_mahasiswa[nim].nama
         del self.__data_mahasiswa[nim]
         self.catat_log(f"Hapus mahasiswa {nama} ({nim})")
+        return True
+
+    def edit_mahasiswa(self, nim, nama_baru, no_hp_baru):
+        mhs = self.__data_mahasiswa.get(nim)
+        if mhs is None:
+            print("[X]  NIM tidak ditemukan")
+            return False
+        if nama_baru:
+            mhs.set_nama(nama_baru)
+        if no_hp_baru:
+            mhs.set_no_hp(no_hp_baru)
+        self.catat_log(f"Edit mahasiswa {mhs.nama} ({nim})")
+        return True
+
+    def tambah_kategori(self, id_kategori, nama):
+        if id_kategori in self.__data_kategori:
+            print("[X]  ID kategori sudah ada")
+            return False
+        for k in self.__data_kategori.values():
+            if k.nama_kategori.lower() == nama.lower():
+                print("[X]  Nama kategori sudah ada")
+                return False
+        self.__data_kategori[id_kategori] = Kategori(id_kategori, nama)
+        self.catat_log(f"Tambah kategori {nama} ({id_kategori})")
+        return True
+
+    def edit_kategori(self, id_kategori, nama_baru):
+        kategori = self.__data_kategori.get(id_kategori)
+        if kategori is None:
+            print("[X]  Kategori tidak ditemukan")
+            return False
+        for k in self.__data_kategori.values():
+            if k is not kategori and k.nama_kategori.lower() == nama_baru.lower():
+                print("[X]  Nama kategori sudah ada")
+                return False
+        lama = kategori.nama_kategori
+        kategori.set_nama(nama_baru)
+        self.catat_log(f"Edit kategori {id_kategori}: {lama} menjadi {nama_baru}")
+        return True
+
+    def hapus_kategori(self, id_kategori):
+        kategori = self.__data_kategori.get(id_kategori)
+        if kategori is None:
+            return False
+        for alat in self.__data_peralatan.values():
+            if alat.kategori.id_kategori == id_kategori:
+                print("[X]  Kategori masih dipakai oleh alat " + alat.nama_alat)
+                return False
+        del self.__data_kategori[id_kategori]
+        self.catat_log(f"Hapus kategori {kategori.nama_kategori} ({id_kategori})")
+        return True
+
+    def edit_alat(self, kode, nama_baru, id_kategori_baru, stok_baru):
+        alat = self.__data_peralatan.get(kode)
+        if alat is None:
+            print("[X]  Kode alat tidak ditemukan")
+            return False
+        kategori = None
+        if id_kategori_baru:
+            kategori = self.__data_kategori.get(id_kategori_baru)
+            if kategori is None:
+                print("[X]  Kategori tidak ditemukan")
+                return False
+        if stok_baru is not None and not alat.set_stok_total(stok_baru):
+            print("[X]  Stok total baru lebih kecil dari jumlah alat yang sedang dipinjam")
+            return False
+        if nama_baru:
+            alat.set_nama(nama_baru)
+        if kategori is not None:
+            alat.set_kategori(kategori)
+        self.catat_log(f"Edit alat {alat.nama_alat} ({kode})")
         return True
 
     def tambah_alat(self, kode, nama, id_kategori, stok):

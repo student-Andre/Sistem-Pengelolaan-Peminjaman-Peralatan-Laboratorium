@@ -22,3 +22,9 @@ class Mahasiswa:
 
     def set_status_aktif(self, status):
         self.__status_aktif = status
+
+    def set_nama(self, nama_baru):
+        self.__nama = nama_baru
+
+    def set_no_hp(self, no_hp_baru):
+        self.__no_hp = no_hp_baru

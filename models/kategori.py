@@ -13,3 +13,6 @@ class Kategori:
 
     def get_info(self):
         return f"{self.__id_kategori} - {self.__nama_kategori}"
+
+    def set_nama(self, nama_baru):
+        self.__nama_kategori = nama_baru
