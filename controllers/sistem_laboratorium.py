@@ -79,6 +79,18 @@ class SistemLaboratorium:
         self.catat_log(f"Edit mahasiswa {mhs.nama} ({nim})")
         return True
 
+    def cari_mahasiswa(self, keyword):
+        keyword = keyword.lower()
+        hasil = []
+        for mhs in self.data_mahasiswa.values():
+            if (
+                keyword in mhs.nim.lower()
+                or keyword in mhs.nama.lower()
+                or keyword in mhs.no_hp.lower()
+            ):
+                hasil.append(mhs)
+        return hasil
+
     def tambah_kategori(self, id_kategori, nama):
         if id_kategori in self.__data_kategori:
             print("[X]  ID kategori sudah ada")
