@@ -1,14 +1,18 @@
 from datetime import datetime, timedelta
-
 from models.detail_peminjaman import DetailPeminjaman
 
 
 class TransaksiPeminjaman:
-    def __init__(self, id_transaksi, mahasiswa):
+    def __init__(
+        self, id_transaksi, mahasiswa, durasi_hari=7
+    ):
         self.__id_transaksi = id_transaksi
         self.__mahasiswa = mahasiswa
         self.__daftar_detail = []
         self.__tgl_pinjam = datetime.now()
+        self.__durasi_hari = (
+            durasi_hari  # Menyimpan durasi custom
+        )
         self.__batas_kembali = self.hitung_batas_kembali()
         self.__status_transaksi = "dipinjam"
 
@@ -37,7 +41,10 @@ class TransaksiPeminjaman:
         return self.__status_transaksi
 
     def hitung_batas_kembali(self):
-        return self.__tgl_pinjam + timedelta(days=7)
+        # Menghitung batas kembali berdasarkan durasi custom (dalam hari)
+        return self.__tgl_pinjam + timedelta(
+            days=self.__durasi_hari
+        )
 
     def tambah_detail(self, alat, jumlah):
         if not alat.is_tersedia(jumlah):
