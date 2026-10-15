@@ -207,7 +207,9 @@ class SistemLaboratorium:
         self.catat_log(f"Hapus alat {nama} ({kode})")
         return True
 
-    def buat_transaksi(self, nim, list_alat_pinjam):
+    def buat_transaksi(
+        self, nim, list_alat_pinjam, durasi_hari=7
+    ):
         mhs = self.__data_mahasiswa.get(nim)
         if mhs is None or not mhs.is_aktif():
             print(
@@ -227,7 +229,11 @@ class SistemLaboratorium:
         id_trx = "TRX" + str(
             len(self.__data_transaksi) + 1
         ).zfill(3)
-        transaksi = TransaksiPeminjaman(id_trx, mhs)
+
+        # Kirim durasi_hari ke constructor TransaksiPeminjaman
+        transaksi = TransaksiPeminjaman(
+            id_trx, mhs, durasi_hari
+        )
         for kode, jumlah in list_alat_pinjam.items():
             transaksi.tambah_detail(
                 self.__data_peralatan[kode], jumlah
@@ -235,7 +241,7 @@ class SistemLaboratorium:
 
         self.__data_transaksi[id_trx] = transaksi
         self.catat_log(
-            f"Transaksi {id_trx} dibuat oleh {mhs.nama}"
+            f"Transaksi {id_trx} dibuat oleh {mhs.nama} (Durasi: {durasi_hari} hari)"
         )
         return transaksi
 
@@ -285,7 +291,7 @@ class SistemLaboratorium:
             ):
                 hasil.append(alat)
         return hasil
-    
+
     def get_statistik_peminjaman(self):
         # 1. Menghitung jumlah transaksi aktif dan selesai
         trx_aktif = 0
@@ -304,11 +310,18 @@ class SistemLaboratorium:
                 nama_alat = d.alat.nama_alat
                 jumlah = d.jumlah_pinjam
                 if kode_alat not in frekuensi_alat:
-                    frekuensi_alat[kode_alat] = {"nama": nama_alat, "total": 0}
+                    frekuensi_alat[kode_alat] = {
+                        "nama": nama_alat,
+                        "total": 0,
+                    }
                 frekuensi_alat[kode_alat]["total"] += jumlah
 
         # Urutkan alat berdasarkan total peminjaman terbanyak
-        alat_terlaris = sorted(frekuensi_alat.values(), key=lambda x: x["total"], reverse=True)
+        alat_terlaris = sorted(
+            frekuensi_alat.values(),
+            key=lambda x: x["total"],
+            reverse=True,
+        )
 
         # 3. Menghitung mahasiswa yang paling sering meminjam
         frekuensi_mhs = {}
@@ -316,17 +329,25 @@ class SistemLaboratorium:
             nim = trx.mahasiswa.nim
             nama = trx.mahasiswa.nama
             if nim not in frekuensi_mhs:
-                frekuensi_mhs[nim] = {"nama": nama, "nim": nim, "total_trx": 0}
+                frekuensi_mhs[nim] = {
+                    "nama": nama,
+                    "nim": nim,
+                    "total_trx": 0,
+                }
             frekuensi_mhs[nim]["total_trx"] += 1
 
         # Urutkan mahasiswa berdasarkan jumlah transaksi terbanyak
-        mhs_teraktif = sorted(frekuensi_mhs.values(), key=lambda x: x["total_trx"], reverse=True)
+        mhs_teraktif = sorted(
+            frekuensi_mhs.values(),
+            key=lambda x: x["total_trx"],
+            reverse=True,
+        )
 
         return {
             "trx_aktif": trx_aktif,
             "trx_selesai": trx_selesai,
             "alat_terlaris": alat_terlaris,
-            "mhs_teraktif": mhs_teraktif
+            "mhs_teraktif": mhs_teraktif,
         }
 
     def catat_log(self, aktivitas):

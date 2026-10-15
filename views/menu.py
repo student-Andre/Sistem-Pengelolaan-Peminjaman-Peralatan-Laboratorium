@@ -79,6 +79,21 @@ def input_angka(teks):
         gagal("Masukkan angka lebih dari 0")
 
 
+def input_durasi(teks):
+    while True:
+        nilai = input("  " + teks).strip()
+        if nilai.isdigit():
+            durasi = int(nilai)
+            if 1 <= durasi <= 7:
+                return durasi
+            else:
+                gagal(
+                    "Durasi peminjaman minimal 1 hari dan maksimal 7 hari!"
+                )
+        else:
+            gagal("Masukkan angka yang valid")
+
+
 def pilih_kondisi(teks):
     daftar = ["baik", "rusak_ringan", "rusak_berat"]
     print(f"  {teks}")
@@ -386,6 +401,13 @@ def menu_buat_transaksi(lab):
     if nim not in lab.data_mahasiswa:
         gagal("Mahasiswa tidak ditemukan")
         return
+
+    # Input custom durasi peminjaman (menggunakan input_angka agar valid > 0)
+    print()
+    durasi = input_durasi(
+        "Durasi peminjaman (hari) (Maks 7 Hari): "
+    )
+
     print()
     tampil_alat(lab)
     info(
@@ -402,10 +424,13 @@ def menu_buat_transaksi(lab):
         jumlah = input_angka("Jumlah       : ")
         pinjam[kode] = pinjam.get(kode, 0) + jumlah
 
-    trx = lab.buat_transaksi(nim, pinjam)
+    # Kirim parameter durasi ke method buat_transaksi
+    trx = lab.buat_transaksi(nim, pinjam, durasi)
     if trx is not None:
         print()
-        sukses("Transaksi berhasil dibuat")
+        sukses(
+            f"Transaksi berhasil dibuat (Batas kembali: {durasi} hari)"
+        )
         tampil_satu_transaksi(trx)
 
 
