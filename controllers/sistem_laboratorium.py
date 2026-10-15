@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from models import (
     Kategori,
@@ -285,6 +285,49 @@ class SistemLaboratorium:
             ):
                 hasil.append(alat)
         return hasil
+    
+    def get_statistik_peminjaman(self):
+        # 1. Menghitung jumlah transaksi aktif dan selesai
+        trx_aktif = 0
+        trx_selesai = 0
+        for trx in self.data_transaksi.values():
+            if trx.status_transaksi.lower() == "dipinjam":
+                trx_aktif += 1
+            elif trx.status_transaksi.lower() == "selesai":
+                trx_selesai += 1
+
+        # 2. Menghitung alat yang paling sering dipinjam berdasarkan detail transaksi
+        frekuensi_alat = {}
+        for trx in self.data_transaksi.values():
+            for d in trx.daftar_detail:
+                kode_alat = d.alat.kode_alat
+                nama_alat = d.alat.nama_alat
+                jumlah = d.jumlah_pinjam
+                if kode_alat not in frekuensi_alat:
+                    frekuensi_alat[kode_alat] = {"nama": nama_alat, "total": 0}
+                frekuensi_alat[kode_alat]["total"] += jumlah
+
+        # Urutkan alat berdasarkan total peminjaman terbanyak
+        alat_terlaris = sorted(frekuensi_alat.values(), key=lambda x: x["total"], reverse=True)
+
+        # 3. Menghitung mahasiswa yang paling sering meminjam
+        frekuensi_mhs = {}
+        for trx in self.data_transaksi.values():
+            nim = trx.mahasiswa.nim
+            nama = trx.mahasiswa.nama
+            if nim not in frekuensi_mhs:
+                frekuensi_mhs[nim] = {"nama": nama, "nim": nim, "total_trx": 0}
+            frekuensi_mhs[nim]["total_trx"] += 1
+
+        # Urutkan mahasiswa berdasarkan jumlah transaksi terbanyak
+        mhs_teraktif = sorted(frekuensi_mhs.values(), key=lambda x: x["total_trx"], reverse=True)
+
+        return {
+            "trx_aktif": trx_aktif,
+            "trx_selesai": trx_selesai,
+            "alat_terlaris": alat_terlaris,
+            "mhs_teraktif": mhs_teraktif
+        }
 
     def catat_log(self, aktivitas):
         self.__logs.append(LogActivity(aktivitas))

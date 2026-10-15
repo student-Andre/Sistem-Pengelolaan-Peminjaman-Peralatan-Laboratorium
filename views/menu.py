@@ -207,8 +207,16 @@ def tampil_kategori(lab):
 
 
 def tabel_alat(daftar):
+    daftar_terurut = sorted(
+        daftar,
+        key=lambda a: (
+            a.kategori.nama_kategori,
+            a.nama_alat,
+        ),
+    )
+
     baris = []
-    for a in daftar:
+    for a in daftar_terurut:
         dipinjam = (
             a.stok_total
             - a.stok_tersedia
@@ -463,6 +471,68 @@ def tampil_log(lab):
         no += 1
 
 
+def menu_statistik_peminjaman(lab):
+    cetak_judul("STATISTIK PEMINJAMAN LABORATORIUM")
+    stat = lab.get_statistik_peminjaman()
+
+    # Tampilkan Ringkasan Status Transaksi
+    print(" [ RINGKASAN STATUS TRANSAKSI ]")
+    print(
+        f"   - Transaksi Masih Aktif  : {stat['trx_aktif']}"
+    )
+    print(
+        f"   - Transaksi Telah Selesai: {stat['trx_selesai']}"
+    )
+    print()
+
+    # Tampilkan Mahasiswa Paling Sering Meminjam
+    print(" [ MAHASISWA PALING SERING MEMINJAM ]")
+    if len(stat["mhs_teraktif"]) > 0:
+        baris_mhs = []
+        for i, m in enumerate(
+            stat["mhs_teraktif"][:5], 1
+        ):  # Ambil top 5
+            baris_mhs.append(
+                [
+                    i,
+                    m["nim"],
+                    m["nama"],
+                    f"{m['total_trx']} kali",
+                ]
+            )
+        cetak_tabel(
+            [
+                "No",
+                "NIM",
+                "Nama Mahasiswa",
+                "Frekuensi Pinjam",
+            ],
+            baris_mhs,
+            [">", "<", "<", ">"],
+        )
+    else:
+        info("Belum ada data peminjaman mahasiswa.")
+    print()
+
+    # Tampilkan Alat yang Paling Sering Dipinjam
+    print(" [ ALAT PALING SERING DIPINJAM ]")
+    if len(stat["alat_terlaris"]) > 0:
+        baris_alat = []
+        for i, a in enumerate(
+            stat["alat_terlaris"][:5], 1
+        ):  # Ambil top 5
+            baris_alat.append(
+                [i, a["nama"], f"{a['total']!s} unit"]
+            )
+        cetak_tabel(
+            ["No", "Nama Alat", "Total Dipinjam"],
+            baris_alat,
+            [">", "<", ">"],
+        )
+    else:
+        info("Belum ada data peminjaman alat.")
+
+
 # ==========================================
 # 7. MENU UTAMA & NAVIGASI TERSTRUKTUR (CRUD)
 # ==========================================
@@ -520,7 +590,11 @@ def tampil_menu(lab):
         ),
         (
             "LAINNYA",
-            [("21", "Log aktivitas"), ("0", "Keluar")],
+            [
+                ("21", "Log aktivitas"),
+                ("22", "Statistik peminjaman"),
+                ("0", "Keluar"),
+            ],
         ),
     ]
 
@@ -615,6 +689,8 @@ def jalankan_menu(lab):
             menu_cari_transaksi(lab)
         elif pilih == "21":
             tampil_log(lab)
+        elif pilih == "22":
+            menu_statistik_peminjaman(lab)
         elif pilih == "0":
             print()
             info("Terima kasih, program selesai.")
