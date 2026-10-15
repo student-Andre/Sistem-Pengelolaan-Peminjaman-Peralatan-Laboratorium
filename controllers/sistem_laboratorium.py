@@ -1,6 +1,12 @@
 from datetime import datetime
 
-from models import Kategori, Mahasiswa, Peralatan, TransaksiPeminjaman, LogActivity
+from models import (
+    Kategori,
+    Mahasiswa,
+    Peralatan,
+    TransaksiPeminjaman,
+    LogActivity,
+)
 
 
 class SistemLaboratorium:
@@ -39,15 +45,22 @@ class SistemLaboratorium:
         if nim in self.__data_mahasiswa:
             print("[X]  NIM sudah terdaftar")
             return
-        self.__data_mahasiswa[nim] = Mahasiswa(nim, nama, no_hp)
+        self.__data_mahasiswa[nim] = Mahasiswa(
+            nim, nama, no_hp
+        )
         self.catat_log(f"Tambah mahasiswa {nama} ({nim})")
 
     def hapus_mahasiswa(self, nim):
         if nim not in self.__data_mahasiswa:
             return False
         for trx in self.__data_transaksi.values():
-            if trx.mahasiswa.nim == nim and trx.status_transaksi == "dipinjam":
-                print("[X]  Mahasiswa masih punya peminjaman yang belum selesai")
+            if (
+                trx.mahasiswa.nim == nim
+                and trx.status_transaksi == "dipinjam"
+            ):
+                print(
+                    "[X]  Mahasiswa masih punya peminjaman yang belum selesai"
+                )
                 return False
         nama = self.__data_mahasiswa[nim].nama
         del self.__data_mahasiswa[nim]
@@ -74,8 +87,12 @@ class SistemLaboratorium:
             if k.nama_kategori.lower() == nama.lower():
                 print("[X]  Nama kategori sudah ada")
                 return False
-        self.__data_kategori[id_kategori] = Kategori(id_kategori, nama)
-        self.catat_log(f"Tambah kategori {nama} ({id_kategori})")
+        self.__data_kategori[id_kategori] = Kategori(
+            id_kategori, nama
+        )
+        self.catat_log(
+            f"Tambah kategori {nama} ({id_kategori})"
+        )
         return True
 
     def edit_kategori(self, id_kategori, nama_baru):
@@ -84,12 +101,18 @@ class SistemLaboratorium:
             print("[X]  Kategori tidak ditemukan")
             return False
         for k in self.__data_kategori.values():
-            if k is not kategori and k.nama_kategori.lower() == nama_baru.lower():
+            if (
+                k is not kategori
+                and k.nama_kategori.lower()
+                == nama_baru.lower()
+            ):
                 print("[X]  Nama kategori sudah ada")
                 return False
         lama = kategori.nama_kategori
         kategori.set_nama(nama_baru)
-        self.catat_log(f"Edit kategori {id_kategori}: {lama} menjadi {nama_baru}")
+        self.catat_log(
+            f"Edit kategori {id_kategori}: {lama} menjadi {nama_baru}"
+        )
         return True
 
     def hapus_kategori(self, id_kategori):
@@ -98,31 +121,47 @@ class SistemLaboratorium:
             return False
         for alat in self.__data_peralatan.values():
             if alat.kategori.id_kategori == id_kategori:
-                print("[X]  Kategori masih dipakai oleh alat " + alat.nama_alat)
+                print(
+                    "[X]  Kategori masih dipakai oleh alat "
+                    + alat.nama_alat
+                )
                 return False
         del self.__data_kategori[id_kategori]
-        self.catat_log(f"Hapus kategori {kategori.nama_kategori} ({id_kategori})")
+        self.catat_log(
+            f"Hapus kategori {kategori.nama_kategori} ({id_kategori})"
+        )
         return True
 
-    def edit_alat(self, kode, nama_baru, id_kategori_baru, stok_baru):
+    def edit_alat(
+        self, kode, nama_baru, id_kategori_baru, stok_baru
+    ):
         alat = self.__data_peralatan.get(kode)
         if alat is None:
             print("[X]  Kode alat tidak ditemukan")
             return False
         kategori = None
         if id_kategori_baru:
-            kategori = self.__data_kategori.get(id_kategori_baru)
+            kategori = self.__data_kategori.get(
+                id_kategori_baru
+            )
             if kategori is None:
                 print("[X]  Kategori tidak ditemukan")
                 return False
-        if stok_baru is not None and not alat.set_stok_total(stok_baru):
-            print("[X]  Stok total baru lebih kecil dari jumlah alat yang sedang dipinjam")
+        if (
+            stok_baru is not None
+            and not alat.set_stok_total(stok_baru)
+        ):
+            print(
+                "[X]  Stok total baru lebih kecil dari jumlah alat yang sedang dipinjam"
+            )
             return False
         if nama_baru:
             alat.set_nama(nama_baru)
         if kategori is not None:
             alat.set_kategori(kategori)
-        self.catat_log(f"Edit alat {alat.nama_alat} ({kode})")
+        self.catat_log(
+            f"Edit alat {alat.nama_alat} ({kode})"
+        )
         return True
 
     def tambah_alat(self, kode, nama, id_kategori, stok):
@@ -133,8 +172,12 @@ class SistemLaboratorium:
             print("[X]  Kode alat sudah ada")
             return
         kategori = self.__data_kategori[id_kategori]
-        self.__data_peralatan[kode] = Peralatan(kode, nama, kategori, stok)
-        self.catat_log(f"Tambah alat {nama} ({kode}) stok {stok}")
+        self.__data_peralatan[kode] = Peralatan(
+            kode, nama, kategori, stok
+        )
+        self.catat_log(
+            f"Tambah alat {nama} ({kode}) stok {stok}"
+        )
 
     def hapus_alat(self, kode):
         if kode not in self.__data_peralatan:
@@ -143,7 +186,9 @@ class SistemLaboratorium:
             if trx.status_transaksi == "dipinjam":
                 for detail in trx.daftar_detail:
                     if detail.alat.kode_alat == kode:
-                        print("[X]  Alat masih ada di peminjaman yang belum selesai")
+                        print(
+                            "[X]  Alat masih ada di peminjaman yang belum selesai"
+                        )
                         return False
         nama = self.__data_peralatan[kode].nama_alat
         del self.__data_peralatan[kode]
@@ -153,7 +198,9 @@ class SistemLaboratorium:
     def buat_transaksi(self, nim, list_alat_pinjam):
         mhs = self.__data_mahasiswa.get(nim)
         if mhs is None or not mhs.is_aktif():
-            print("[X]  Mahasiswa tidak ditemukan atau tidak aktif")
+            print(
+                "[X]  Mahasiswa tidak ditemukan atau tidak aktif"
+            )
             return None
         if len(list_alat_pinjam) == 0:
             print("[X]  Alat yang dipinjam masih kosong")
@@ -165,26 +212,52 @@ class SistemLaboratorium:
                 print(f"[X]  Alat {kode} tidak tersedia")
                 return None
 
-        id_trx = "TRX" + str(len(self.__data_transaksi) + 1).zfill(3)
+        id_trx = "TRX" + str(
+            len(self.__data_transaksi) + 1
+        ).zfill(3)
         transaksi = TransaksiPeminjaman(id_trx, mhs)
         for kode, jumlah in list_alat_pinjam.items():
-            transaksi.tambah_detail(self.__data_peralatan[kode], jumlah)
+            transaksi.tambah_detail(
+                self.__data_peralatan[kode], jumlah
+            )
 
         self.__data_transaksi[id_trx] = transaksi
-        self.catat_log(f"Transaksi {id_trx} dibuat oleh {mhs.nama}")
+        self.catat_log(
+            f"Transaksi {id_trx} dibuat oleh {mhs.nama}"
+        )
         return transaksi
 
-    def proses_pengembalian(self, id_transaksi, kode_alat, jumlah, kondisi):
+    def cari_transaksi(self, keyword):
+        keyword = keyword.lower()
+        hasil = []
+        for trx in self.data_transaksi.values():
+            if (
+                keyword in trx.id_transaksi.lower()
+                or keyword in trx.mahasiswa.nim.lower()
+                or keyword in trx.mahasiswa.nama.lower()
+            ):
+                hasil.append(trx)
+        return hasil
+
+    def proses_pengembalian(
+        self, id_transaksi, kode_alat, jumlah, kondisi
+    ):
         transaksi = self.__data_transaksi.get(id_transaksi)
         if transaksi is None:
             return False
 
         for detail in transaksi.daftar_detail:
             if detail.alat.kode_alat == kode_alat:
-                berhasil = detail.proses_pengembalian(jumlah, kondisi, datetime.now())
+                berhasil = detail.proses_pengembalian(
+                    jumlah, kondisi, datetime.now()
+                )
                 if berhasil:
-                    status = transaksi.update_status_transaksi()
-                    self.catat_log(f"{id_transaksi}: {kode_alat} x{jumlah} kembali ({kondisi}), status {status}")
+                    status = (
+                        transaksi.update_status_transaksi()
+                    )
+                    self.catat_log(
+                        f"{id_transaksi}: {kode_alat} x{jumlah} kembali ({kondisi}), status {status}"
+                    )
                 return berhasil
         return False
 
@@ -192,9 +265,12 @@ class SistemLaboratorium:
         keyword = keyword.lower()
         hasil = []
         for alat in self.__data_peralatan.values():
-            if (keyword in alat.nama_alat.lower()
-                    or keyword in alat.kode_alat.lower()
-                    or keyword in alat.kategori.nama_kategori.lower()):
+            if (
+                keyword in alat.nama_alat.lower()
+                or keyword in alat.kode_alat.lower()
+                or keyword
+                in alat.kategori.nama_kategori.lower()
+            ):
                 hasil.append(alat)
         return hasil
 
