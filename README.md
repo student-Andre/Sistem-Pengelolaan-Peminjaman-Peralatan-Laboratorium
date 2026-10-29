@@ -105,7 +105,6 @@ Alur singkat memakai aplikasi: tambah mahasiswa (menu 1), lihat alat (menu 8), b
 
 ## Pembagian Kontribusi Anggota
 
-> Bagian ini perlu diisi kelompok sesuai pembagian kerja yang sebenarnya.
 
 | Anggota | NIM | Kontribusi |
 |---|---|---|
